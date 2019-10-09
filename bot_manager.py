@@ -4,7 +4,7 @@ from requests.exceptions import HTTPError
 
 
 class BotManager:
-    URL_BASE = "https://services.rspeer.org/api/botLauncher/"
+    URL_BASE = "https://services.rspeer.org/api/"
     DEFAULT_JVM = "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m"
 
     def __init__(self, api_key):
@@ -43,16 +43,16 @@ class BotManager:
             'socket': launcher
         }
 
-        return self._do_request('send', data=dat)
+        return self._do_request('botLauncher/send', data=dat)
 
     def get_launchers(self):
-        return self._do_request('connected')
+        return self._do_request('botLauncher/connected')
 
     def get_clients(self):
-        return self._do_request('connectedClients')
+        return self._do_request('botLauncher/connectedClients')
 
     def get_proxies(self):
-        return self._do_request('getProxies')
+        return self._do_request('botLauncher/getProxies')
 
     def add_proxy(self, ip, name, password, port, username):
         dat = {
@@ -62,31 +62,42 @@ class BotManager:
             'port': port,
             'username': username
         }
-        return self._do_request('saveProxy', data=dat)
+        return self._do_request('botLauncher/saveProxy', data=dat)
 
     def delete_proxy(self, proxy_id):
-        return self._do_request('deleteProxy?id=' + proxy_id, data={})  # Empty data to make it a post
+        return self._do_request('botLauncher/deleteProxy?id=' + proxy_id, data={})  # Empty data to make it a post
+
+    def get_account_info(self):
+        """
+        Info about your RSPeer account.
+        Contains the maximum number of instances you can open.
+        """
+        return self._do_request('user/me', data={"includeBalance": True})
 
 
 if __name__ == '__main__':
-    api_key = "paste ur key in"
-    b = BotManager(api_key)
-    launchers = b.get_launchers()
-    proxies = b.get_proxies()
+    API_KEY = ""
+    b = BotManager(API_KEY)
+    d = b.get_launchers()
+    #p = b.get_proxies()
 
     # Launcher id's returned as keys.
-    s = list(launchers.keys())[0]  # assuming you have at least one launcher open.
+    s = list(d.keys())[0]  # assuming you have at least one launcher open.
     launch_script = {
-        'name': "a",
-        'clients': {
-            0: {
+        'clients': [
+            {
+                "game": 0,
                 "script": {
                     "scriptArgs": "",
                     "isRepoScript": False,
-                    "name": "AScriptName"
+                    "name": "ScriptName"
+                },
+                "config": {
+                    "lowCpuMode": True
                 }
+
             }
-        }
+        ],
     }
-    b.launch_client(s, qs=launch_script)
+    #b.launch_client(s, qs=launch_script)
 
